@@ -4,15 +4,20 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node index.js"
   },
   "author": "",
   "license": "",
   "dependencies": {
     "bcrypt": "^3.0.6",
-    "body-parser": "^1.19.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.6.7",
-    "restify": "^8.3.3"
+    "restify": "^8.3.3",
+    "restify-jwt-community": "^1.0.14"
+  },
+  "devDependencies": {
+    "@types/mongoose": "^5.5.11",
+    "@types/node": "^12.6.8",
+    "@types/restify": "^7.2.12"
   }
 }
