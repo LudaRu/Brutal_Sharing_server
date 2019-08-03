@@ -4,25 +4,28 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "author": "",
   "license": "",
   "dependencies": {
-    "bcrypt": "^3.0.6",
+    "config": "^3.2.2",
+    "connect-mongo": "^3.0.0",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
+    "express-jwt": "^5.3.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.6.7",
     "passport": "^0.4.0",
-    "passport-vkontakte": "^0.3.2",
-    "restify": "^8.3.3",
-    "restify-jwt-community": "^1.0.14"
+    "passport-vkontakte": "^0.3.2"
   },
   "devDependencies": {
     "@types/express": "^4.17.0",
     "@types/mongoose": "^5.5.11",
     "@types/node": "^12.6.8",
     "@types/passport": "^1.0.0",
-    "@types/restify": "^7.2.12"
+    "@types/restify": "^7.2.12",
+    "nodemon": "^1.19.1"
   }
 }

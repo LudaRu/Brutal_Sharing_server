@@ -1,0 +1,9 @@
+{
+  "url": "http://127.0.0.1:3000",
+  "db": "mongodb://25.68.185.23:27017/brutal",
+  "jwt_secret": "7079314uHxFinKlSOWmoyHgyAfy",
+  "vk" : {
+    "id": "7079314",
+    "secret": "uHxFinKlSOWmoyHgyAfy"
+  }
+}

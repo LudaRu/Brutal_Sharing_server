@@ -1,13 +1,15 @@
-const CONFIG = require('./config');
+const config = require('config');
 const app = require('./app');
-const port = CONFIG.PORT || 3000;
+const mongoose = require('mongoose');
 
-// require('./routes/user')(server);
+const port = 3000;
+
+mongoose.connect(config.get('db'), { useNewUrlParser: true });
 
 app.listen(port, function (err) {
     if (err) {
         throw err
     }
-    console.log(`сервер ис листенинг он порт ${CONFIG.PORT}`)
+    console.log(`сервер ис листенинг`)
 });
 

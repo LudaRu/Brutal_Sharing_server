@@ -1,34 +1,73 @@
+const config = require('config');
 const VkStrategy = require('passport-vkontakte').Strategy;
 const passport = require('passport');
-const routes =  require('./authRoutes');
+// const session = require('express-session');
+// const MongoStore = require('connect-mongo')(session);
+const mongoose = require('mongoose');
+
+const User = require('../../models/Users');
+
+
+mongoose.connect(config.get('db'),  { useNewUrlParser: true });
 
 /** @param {Application} app */
 module.exports = (app) => {
-    init(app);
-    app.use('/auth', routes(passport));
+    initPassport(app);
+    app.use('/auth', require('./auth.routes'));
 };
 
 /** @param {Application} app */
-const init = (app) => {
-    // Íàñòðîéêà ïàñïîðòà
+const initPassport = (app) => {
+
     app.use(passport.initialize());
     app.use(passport.session());
 
-    passport.serializeUser((user, done) => {
-        done(null, user);
+
+    passport.serializeUser(function(user, done) {
+        done(null, user._id);
     });
-    passport.deserializeUser((user, done) => {
-        done(null, user);
+
+    passport.deserializeUser(function(id, done) {
+        User.findById(id, function(err, user) {
+            done(err, user);
+        });
     });
 
     passport.use(new VkStrategy({
-            clientID:     '7079314', // ID ïðèëîæåíèÿ
-            clientSecret: 'uHxFinKlSOWmoyHgyAfy', // Çàùèù¸ííûé êëþ÷
-            callbackURL:  "http://127.0.0.1:3000/auth/vkontakte/callback" // Äîâåðåííûé redirect URI:
+            clientID: config.get('vk.id'),
+            clientSecret: config.get('vk.secret'),
+            callbackURL: config.get('url') + '/auth/vk/callback'
         },
-        (accessToken, refreshToken, params, profile, done) => {
-            return done(false, {});
+        (accessToken, refreshToken, profile, done) => {
+            process.nextTick(() => {
+                User.findOne({'vk.id': profile.id}, (err, user) => {
+                    if(err)
+                        return done(err);
+                    if(user)
+                        return done(null, user); // Ð£Ð¶Ðµ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»ÑŒ ÐµÑÑ‚ÑŒ
+                    else {
+                        const newUser = new User(); // Ð¡Ð¾Ð·Ð´Ð°ÐµÐ¼ Ð½Ð¾Ð²Ð¾Ð³Ð¾
+                        mappingVkUser(newUser, profile);
+                        newUser.save(function(err){
+                        	if(err)
+                        		throw err;
+                        	return done(null, newUser);
+                        });
+                    }
+                });
+            });
         }
     ));
+
+    /**
+     * FIXME ÐÐ°Ð´Ð¾ Ð½Ð¾Ñ€Ð¼Ð°Ð»ÑŒÐ½Ñ‹Ð¹ Ð¼Ð°Ð¿Ð¸Ð½Ð³ ÑÐ´ÐµÐ»Ð°Ñ‚ÑŒ!!!
+     */
+    const mappingVkUser = (User, profile) => {
+        User.vk.id = profile.id;
+        User.vk.name.fullName = profile.name.givenName + ' ' + profile.name.familyName;
+        User.vk.name.givenName = profile.name.givenName;
+        User.vk.name.familyName = profile.name.familyName;
+        User.vk.photo = profile.photos[0].value;
+    }
 };
 
