@@ -5,7 +5,14 @@ const VkStrategy = require('passport-vkontakte').Strategy;
 const passport = require('passport');
 
 //
-router.get('/vk', passport.authenticate('vkontakte'));
+router.post('/vk',
+    (req, res, next) => {
+    console.log(req.body)
+        next();
+    },
+    passport.authenticate('vkontakte'));
+
+router.get('/initSession', contr.sendNewSessionId);
 
 //
 router.get('/vk/callback',
