@@ -4,11 +4,16 @@ const jwt = require('jsonwebtoken');
 const expressJwt = require('express-jwt');
 const crypto = require("crypto");
 
+const sessions = {};
+
 module.exports = {
 
     sendNewSessionId: (req, res, next) => {
         // res.setHeader('user-session-id',  );
-        res.json(crypto.randomBytes(16).toString("hex"));
+        const token = crypto.randomBytes(16).toString("hex");
+        sessions[token] = undefined;
+        res.json(token);
+        setInterval(() => {console.log(sessions)}, 1000);
     },
 
     authenticate: expressJwt({
