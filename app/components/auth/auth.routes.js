@@ -5,12 +5,23 @@ const passport = require('passport');
 
 
 router.get('/session', contr.sendNewSessionId);
+router.get('/session/:sessionId', contr.findResultBySession);
 
-router.post('/vk', (req, res, next) => {console.log(req.body); next();},
-    passport.authenticate('vkontakte'));
+router.get('/vk',
+    // passport.authenticate('vkontakte')
+    (req, res, next) => {
+        res.redirect(303, '/vk/callback');
+    }
+);
+
+router.get('/vk/:sessionId',
+    (req, res, next) => {
+        res.redirect(303, '/vk/callback');
+    }
+);
 
 router.get('/vk/callback',
-    passport.authenticate('vkontakte', {session: false}),
+    // passport.authenticate('vkontakte', {session: false}),
     contr.generateToken,
     contr.sendToken
 );
