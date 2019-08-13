@@ -18,5 +18,6 @@ app.use((req, res, next) =>  {
 // const db = require('../config/db');
 
 require('./components/auth')(app);
+require('./components/users')(app);
 
 module.exports = app;

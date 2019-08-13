@@ -29,9 +29,8 @@ module.exports = (passport) => {
                     else {
                         const newUser = new User(); // Создаем нового
                         mappingVkUser(newUser, profile);
-                        newUser.save(function(err){
-                            if(err)
-                                throw err;
+                        newUser.save( err => {
+                            if (err) throw err;
                             return done(null, newUser);
                         });
                     }

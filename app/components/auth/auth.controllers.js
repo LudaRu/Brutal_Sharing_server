@@ -38,7 +38,7 @@ module.exports = {
 
     generateToken: (req, res, next) => {
         req.token = jwt.sign({id: req.user.id}, config.get('jwt_secret'), {expiresIn: 60 * 120 * 1000});
-        sessions[]
+        // sessions[]
         next();
     },
 
