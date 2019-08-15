@@ -3,6 +3,7 @@ const User = require('../../models/Users');
 const jwt = require('jsonwebtoken');
 const expressJwt = require('express-jwt');
 const crypto = require("crypto");
+const ch = require(appRoot + '/tools/helperController');
 
 const sessions = {};
 
@@ -49,13 +50,14 @@ module.exports = {
         // res.status(200).send(req.token);
     },
 
-    getCurrentUser: (req, res, next) => {
-        User.findById(req.user.id, (err, user) => {
-            if (err) next(err);
-
-            req.user = user;
-            next();
-        });
+    getCurrentUser: async (req, res, next) => {
+        await User
+            .findById(req.user.id)
+            .then(
+                (data) => {req.user = data},
+                ch.throwError()
+            );
+        next();
     },
 
     getOne: (req, res) => {

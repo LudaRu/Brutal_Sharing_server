@@ -14,6 +14,14 @@ app.use((req, res, next) =>  {
     }
 });
 
+
+//*** INIT GLOBAL **//
+
+const path = require('path');
+global.appRoot = path.resolve(__dirname);
+
+
+
 // const MongoClient    = require('mongodb').MongoClient;
 // const db = require('../config/db');
 
