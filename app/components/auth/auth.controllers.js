@@ -31,6 +31,12 @@ module.exports = {
     /** url=vk **/
 
     passportAuthenticate: async (req, res, next) => {
+        if (!req.query.id)
+        {
+            ch.sendError(res) (new Error('GET param id not found'));
+            return;
+        }
+
         passport.authenticate(
             'vkontakte', {callbackURL: config.get('url') + '/auth/vk/callback?id='+req.query.id}
             )(req,res,next);
