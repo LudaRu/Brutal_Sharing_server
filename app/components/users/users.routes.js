@@ -1,22 +1,32 @@
+const auth = require("../auth/auth.controllers");
+
 const express = require('express');
 const router = express.Router();
 const contr = require('./users.controllers');
-const passport = require('passport');
-const ch = require(appRoot + '/tools/helperController');
+const ch = require('../../midleware/helperController');
 
-router.get('/', contr.getAllUsers);
-router.get('/me', contr.getMe);
-router.get('/:userId', contr.getByUserId);
-router.get('/jwt/:token',
+router.route('/')
+    .get(contr.getAllUsers);
+
+
+router.route('/me')
+    .get(
+        auth.authenticate,
+        contr.getMe,
+    );
+
+
+router.route('/:number')
+    .get(contr.getByUserId);
+
+
+router.route('/jwt/:num').get(
+    contr.TESTgetJwt,
+    auth.generateToken,
     (req, res, next) => {
-        User
-            .findById(req.params['token'])
-            .then(
-                ch.sendSuccess(res),
-                ch.throwError()
-            );
-    },
+        ch.sendSuccess(res) ({token: req['token'],user: req.user})
+    }
 );
-// router.get('/session/:sessionId', contr.findResultBySession);
+
 
 module.exports = router;

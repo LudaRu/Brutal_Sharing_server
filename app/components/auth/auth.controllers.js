@@ -3,28 +3,55 @@ const User = require('../../models/Users');
 const jwt = require('jsonwebtoken');
 const expressJwt = require('express-jwt');
 const crypto = require("crypto");
-const ch = require(appRoot + '/tools/helperController');
+const passport = require('passport');
+const ch = require('../../midleware/helperController');
 
-const sessions = {};
+const tmpSessions = {};
 
 module.exports = {
-    // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVkNDU2Y2VkZjhjZDMzMjZmNDZiOTIxMiIsImlhdCI6MTU2NTYxNTAyNSwiZXhwIjoxNTcyODE1MDI1fQ.F2FNKHnVFgs8EJIXaUqXi-WTzzsqZwFRa0bxLk90SY0
 
-    sendNewSessionId: (req, res, next) => {
-        // res.setHeader('user-session-id',  );
-        const token = crypto.randomBytes(8).toString("hex");
-        sessions[token] = undefined;
-        console.log('send',sessions);
-        res.json(token);
+    /** url=session Сессия **/
+
+    sendNewSessionId: async (req, res, next) => {
+        const sessionId = crypto.randomBytes(8).toString("hex");
+        tmpSessions[sessionId] = true;
+
+        ch.sendSuccess(res) (sessionId);
     },
 
-    // Проверяем результат авторизации в вк
-    findResultBySession: (req, res, next) => {
-        const sessionId = req.params['sessionId'];
-        console.log('find sessions[sessionId]', sessions[sessionId]);
-        res.json(sessions[sessionId] || undefined);
-        delete sessions[sessionId]
-        // res.setHeader('user-session-id',  );
+    // Проверяем результат авторизации
+    findResultBySession: async (req, res, next) => {
+        const sessionId = req.params.sessionId;
+
+        ch.sendSuccesOrErrorIf(res, (data) => !!data) (tmpSessions[sessionId]);
+        delete tmpSessions[sessionId];
+    },
+
+
+    /** url=vk **/
+
+    passportAuthenticate: async (req, res, next) => {
+        passport.authenticate(
+            'vkontakte', {callbackURL: config.get('url') + '/auth/vk/callback?id='+req.query.id}
+            )(req,res,next);
+    },
+
+    // Создание токена
+    generateToken: async (req, res, next) => {
+        req.token = jwt.sign({id: req.user.id}, config.get('jwt_secret'), {expiresIn: 60 * 120 * 1000});
+
+        // Добавим в хранилище, что бы пользователь
+        // мог по запросу (findResultBySession) достать постоянный токен
+        tmpSessions[req.query['id']] = req.token;
+        next();
+    },
+
+    // Отправка в хедере токен
+    sendToken: async (req, res, next) => {
+        console.log(req.query['id']);
+        res.setHeader('x-auth-token', req.token);
+        res.redirect(303, req.headers.referer || '')
+        // res.status(200).send(req.token);
     },
 
     authenticate: expressJwt({
@@ -33,35 +60,8 @@ module.exports = {
             if (req.headers['x-auth-token']) {
                 return req.headers['x-auth-token'];
             }
-            return null;
+
+            throw new Error('x-auth-token not faund in header');
         }
     }),
-
-    generateToken: (req, res, next) => {
-        req.token = jwt.sign({id: req.user.id}, config.get('jwt_secret'), {expiresIn: 60 * 120 * 1000});
-        // sessions[]
-        next();
-    },
-
-    sendToken: (req, res, next) => {
-        res.setHeader('x-auth-token', req.token);
-        console.log('send', sessions);
-        res.redirect(303, req.headers.referer)
-        // res.status(200).send(req.token);
-    },
-
-    getCurrentUser: async (req, res, next) => {
-        await User
-            .findById(req.user.id)
-            .then(
-                (data) => {req.user = data},
-                ch.throwError()
-            );
-        next();
-    },
-
-    getOne: (req, res) => {
-        res.json(req.user.toObject())
-    },
-
 };

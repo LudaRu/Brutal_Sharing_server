@@ -1,6 +1,7 @@
 const config = require('config');
 const VkStrategy = require('passport-vkontakte').Strategy;
 const User = require('../../models/Users');
+const ch = require('../../midleware/helperController');
 
 /** @param {Authenticator} passport*/
 module.exports = (passport) => {
@@ -16,8 +17,7 @@ module.exports = (passport) => {
 
     passport.use(new VkStrategy({
             clientID: config.get('vk.id'),
-            clientSecret: config.get('vk.secret'),
-            callbackURL: config.get('url') + '/auth/vk/callback'
+            clientSecret: config.get('vk.secret')
         },
         (accessToken, refreshToken, profile, done) => {
             process.nextTick(() => {

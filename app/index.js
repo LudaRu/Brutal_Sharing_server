@@ -25,7 +25,13 @@ global.appRoot = path.resolve(__dirname);
 // const MongoClient    = require('mongodb').MongoClient;
 // const db = require('../config/db');
 
-require('./components/auth')(app);
-require('./components/users')(app);
+try {
+    require('./components/auth')(app);
+    require('./components/users')(app);
+} catch (e) {
+    console.log('asdasd');
+}
+
+
 
 module.exports = app;
